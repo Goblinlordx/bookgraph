@@ -1,6 +1,6 @@
 {
   "name": "bookgraph",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "source": "src/index.ts",
   "main": "dist/index.js",
   "license": "MIT",
