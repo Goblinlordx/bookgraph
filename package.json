@@ -1,0 +1,21 @@
+{
+  "name": "bookgraph",
+  "version": "1.0.0",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "parcel build",
+    "watch": "parcel watch",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "jest": "^27.2.5",
+    "parcel": "^2.0.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "ts-jest": "^27.0.7"
+  }
+}
