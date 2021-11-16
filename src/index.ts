@@ -238,6 +238,12 @@ export const graphViewer = (
       graphViewer(graph, revealNodes(internalState)(ids)),
     hideNodes: (ids: string[]) =>
       graphViewer(graph, hideNodes(internalState)(ids)),
+    getTypes: () =>
+      graph.nodeSchema.map((s) => ({
+        type: s.type,
+        fields: s.fields.map((f) => ({ ...f })),
+      })),
+    getConnectionTypes: graph.graphSchema.connections.map((c) => c.slice()),
     getChildren: getVC,
     getChildrenByType: (id: string, type: string) => queryType(getVC(id), type),
     getNodes: () => [...vNodes],
