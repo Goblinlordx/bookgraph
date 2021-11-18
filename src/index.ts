@@ -173,8 +173,6 @@ export const graphBuilder = (_graph?: Graph) => {
   };
 };
 
-export type GraphBuilder = ReturnType<typeof graphBuilder>;
-
 export const getVisibleNodes = (graph: Graph) => (revealed: string[]) => {
   const visible = new Set(revealed);
 
@@ -256,4 +254,6 @@ export const graphViewer = (
   };
 };
 
+export type GraphBuilder = ReturnType<typeof graphBuilder>;
 export type GraphViewer = ReturnType<typeof graphViewer>;
+export * from './node.d'
