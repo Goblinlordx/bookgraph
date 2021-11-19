@@ -246,7 +246,7 @@ export const graphViewer = (
         type: s.type,
         fields: s.fields.map((f) => ({ ...f })),
       })),
-    getConnectionTypes: graph.graphSchema.connections.map((c) => c.slice()),
+    getConnectionTypes: () => graph.graphSchema.connections.map((c) => c.slice()),
     getChildren: getVC,
     getChildrenByType: (id: string, type: string) => queryType(getVC(id), type),
     getNodes: () => [...vNodes],
