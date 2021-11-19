@@ -1,10 +1,10 @@
-import {
+import type {
   Graph,
   Node,
   NodeConectionSchema,
   NodeTypeSchema,
   ViewerState,
-} from "./node";
+} from "./types";
 
 export const initGraph = (): Graph => {
   return {
@@ -37,14 +37,13 @@ export const updateNodeType = (graph: Graph) => (schema: NodeTypeSchema) => {
   };
 };
 
-export const removeNodeType = (graph: Graph) => (schema: NodeTypeSchema) => {
-  const { type: newType } = schema;
-  const exists = graph.nodeSchema.some((t) => t.type === newType);
+export const removeNodeType = (graph: Graph) => (type: string) => {
+  const exists = graph.nodeSchema.some((t) => t.type === type);
   if (!exists) throw new Error("Type does not exist");
 
   return {
     ...graph,
-    nodeSchema: graph.nodeSchema.filter((t) => t.type === newType),
+    nodeSchema: graph.nodeSchema.filter((t) => t.type !== type),
   };
 };
 
@@ -88,12 +87,15 @@ export const addConnection =
     const valid = connection.every((id) => existingIds.has(id));
     if (!valid) throw new Error(`ID does not exist`);
 
-    const conIds = new Set(connection)
-    const conTypes = graph.nodes.filter(n => conIds.has(n.id)).map(n => n.type)
+    const conIds = new Set(connection);
+    const conTypes = graph.nodes
+      .filter((n) => conIds.has(n.id))
+      .map((n) => n.type);
     const validType = graph.graphSchema.connections.some(
       ([l, r]) => l === conTypes[0] && r === conTypes[1]
     );
-    if (!validType) throw new Error(`invalid connection type: ${conTypes.join(' -> ')}`)
+    if (!validType)
+      throw new Error(`invalid connection type: ${conTypes.join(" -> ")}`);
 
     const list = graph.adjacencyList[connection[0]]?.slice() || [];
     if (list.indexOf(connection[0]) === -1) list.push(connection[1]);
@@ -112,6 +114,7 @@ export const addConnection =
 export const removeConnection =
   (graph: Graph) => (connection: NodeConectionSchema) => {
     const existingIds = new Set(graph.nodes.map((n) => n.id));
+
     const valid = connection.every((id) => existingIds.has(id));
     if (!valid) throw new Error(`ID does not exist`);
 
@@ -168,8 +171,8 @@ export const graphBuilder = (_graph?: Graph) => {
       graphBuilder(addNodeType(graph)(nodeType)),
     updateNodeType: (nodeType: NodeTypeSchema) =>
       graphBuilder(updateNodeType(graph)(nodeType)),
-    removeNodeType: (nodeType: NodeTypeSchema) =>
-      graphBuilder(removeNodeType(graph)(nodeType)),
+    removeNodeType: (type: string) =>
+      graphBuilder(removeNodeType(graph)(type)),
   };
 };
 
@@ -214,12 +217,12 @@ export const hideNodes = (viewerState: ViewerState) => (ids: string[]) => {
 
 export const getNodeById = (nodes: Node[]) => {
   const nodeMap = nodes.reduce<Record<string, Node>>((a, n) => {
-    a[n.id] = n
-    return a
-  }, {})
+    a[n.id] = n;
+    return a;
+  }, {});
 
-  return (id: string) => nodeMap[id]
-}
+  return (id: string) => nodeMap[id];
+};
 
 export const graphViewer = (
   graph: Graph,
@@ -254,6 +257,4 @@ export const graphViewer = (
   };
 };
 
-export type GraphBuilder = ReturnType<typeof graphBuilder>;
-export type GraphViewer = ReturnType<typeof graphViewer>;
-export * from './node.d'
+export * from './types'

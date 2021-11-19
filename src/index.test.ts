@@ -1,4 +1,4 @@
-import { addNodeType, createNode, getVisibleNodes, graphBuilder, graphViewer } from ".";
+import { createNode, getVisibleNodes, graphBuilder, graphViewer } from ".";
 
 const basicGraph = () => {
   const asdfWorld = {
@@ -43,11 +43,11 @@ const basicGraph = () => {
 
   const charDesc1 = {
     id: "5",
-    type: 'character_description',
+    type: "character_description",
     data: {
-      description: 'Tall'
-    }
-  }
+      description: "Tall",
+    },
+  };
 
   const char2 = {
     id: "6",
@@ -124,7 +124,7 @@ const basicGraph = () => {
     .addConnection([char1.id, charDesc1.id])
     .build();
 
-  return graph
+  return graph;
 };
 
 describe("graphBuilder", () => {
@@ -239,7 +239,7 @@ describe("graphBuilder", () => {
       .addConnection([asdfWorld.id, book1.id])
       .build();
 
-    expect(graph.adjacencyList['0']).toEqual(['1'])
+    expect(graph.adjacencyList["0"]).toEqual(["1"]);
   });
 
   it("can add new connection", () => {
@@ -265,7 +265,7 @@ describe("graphBuilder", () => {
       data: {
         name: "1",
       },
-    }
+    };
 
     const book1chapter2 = {
       id: "3",
@@ -273,7 +273,7 @@ describe("graphBuilder", () => {
       data: {
         name: "1",
       },
-    }
+    };
 
     const char1 = {
       id: "4",
@@ -281,7 +281,7 @@ describe("graphBuilder", () => {
       data: {
         name: "char1",
       },
-    }
+    };
 
     const char2 = {
       id: "5",
@@ -289,7 +289,7 @@ describe("graphBuilder", () => {
       data: {
         name: "char2",
       },
-    }
+    };
 
     const graph = graphBuilder()
       .addNodeType({
@@ -344,10 +344,10 @@ describe("graphBuilder", () => {
       .addConnection([book1chapter1.id, char1.id])
       .addConnection([book1chapter2.id, char2.id])
       .build();
-    
-      const visible = getVisibleNodes(graph)(['0', '1', '2'])
 
-      expect(visible).toMatchInlineSnapshot(`
+    const visible = getVisibleNodes(graph)(["0", "1", "2"]);
+
+    expect(visible).toMatchInlineSnapshot(`
 Array [
   "0",
   "1",
@@ -355,42 +355,43 @@ Array [
   "3",
   "4",
 ]
-`)
+`);
   });
 
-  it('will error when adding invalid connection', () => {
+  it("will error when adding invalid connection", () => {
     const t = () => graphBuilder(basicGraph()).addConnection(["5", "0"]);
 
-    expect(t).toThrowError('invalid connection type: world -> character_description')
-  })
+    expect(t).toThrowError(
+      "invalid connection type: world -> character_description"
+    );
+  });
 });
 
+describe("graphViewer", () => {
+  it("can reveal nodes", () => {
+    const viewer = graphViewer(basicGraph());
+    const nodes = viewer.revealNodes(["0"]).getNodes();
 
-describe('graphViewer', () => {
-  it('can reveal nodes', () => {
-    const viewer = graphViewer(basicGraph())
-    const nodes = viewer.revealNodes(['0']).getNodes()
+    expect(nodes.length).toEqual(2);
 
-    expect(nodes.length).toEqual(2)
+    const nodes2 = viewer.revealNodes(["0", "1"]).getNodes();
 
-    const nodes2 = viewer.revealNodes(['0', '1']).getNodes()
+    expect(nodes2.length).toEqual(4);
+  });
 
-    expect(nodes2.length).toEqual(4)
-  }) 
-
-  it('can hide nodes', () => {
-    const viewer = graphViewer(basicGraph())
+  it("can hide nodes", () => {
+    const viewer = graphViewer(basicGraph());
     const nodes = viewer.revealNodes(["0"]).hideNodes(["1"]).getNodes();
 
-    expect(nodes.length).toEqual(2)
-  })
+    expect(nodes.length).toEqual(2);
+  });
 
-  it('can get visible children nodes', () => {
-    const viewer = graphViewer(basicGraph())
-    const nodes = viewer.revealNodes(["0", '1']).getChildren("1");
+  it("can get visible children nodes", () => {
+    const viewer = graphViewer(basicGraph());
+    const nodes = viewer.revealNodes(["0", "1"]).getChildren("1");
 
-    expect(nodes.length).toEqual(2)
-  })
+    expect(nodes.length).toEqual(2);
+  });
 
   it("can get by type", () => {
     const viewer = graphViewer(basicGraph());
@@ -400,39 +401,42 @@ describe('graphViewer', () => {
     expect(nodes.every((n) => n.type === "chapter")).toBeTruthy();
   });
 
-  it('can get children by type', () => {
-    const viewer = graphViewer(basicGraph())
+  it("can get children by type", () => {
+    const viewer = graphViewer(basicGraph());
     const nodes = viewer
       .revealNodes(["0", "1", "2"])
       .getChildrenByType("2", "character");
 
-    expect(nodes.length).toEqual(1)
-    expect(nodes[0]?.id).toEqual('4')
-  })
+    expect(nodes.length).toEqual(1);
+    expect(nodes[0]?.id).toEqual("4");
+  });
 
-  it('can store and restore state', () => {
-    const graph = basicGraph()
+  it("can store and restore state", () => {
+    const graph = basicGraph();
 
-    const stored = graphViewer(graph).revealNodes(['0', '1']).state()
-    const restored = graphViewer(graph, stored).getNodes()
+    const stored = graphViewer(graph).revealNodes(["0", "1"]).state();
+    const restored = graphViewer(graph, stored).getNodes();
 
-    expect(restored.length).toEqual(4)
-  })
+    expect(restored.length).toEqual(4);
+  });
 
+  it("getNodeById: can retrieve invisible node", () => {
+    const graph = basicGraph();
 
-  it('getNodeById: can retrieve invisible node', () => {
-    const graph = basicGraph()
+    const invisibleNode = graphViewer(graph)
+      .revealNodes(["0", "1"])
+      .getNodeById("5");
 
-    const invisibleNode = graphViewer(graph).revealNodes(['0', '1']).getNodeById('5')
+    expect(invisibleNode?.id).toEqual("5");
+  });
 
-    expect(invisibleNode?.id).toEqual('5')
-  })
+  it("getVNodeById: can not retrieve invisible node", () => {
+    const graph = basicGraph();
 
-  it('getVNodeById: can not retrieve invisible node', () => {
-    const graph = basicGraph()
+    const invisibleNode = graphViewer(graph)
+      .revealNodes(["0", "1"])
+      .getVNodeById("5");
 
-    const invisibleNode = graphViewer(graph).revealNodes(['0', '1']).getVNodeById('5')
-
-    expect(invisibleNode).toEqual(undefined)
-  })
-})
+    expect(invisibleNode).toEqual(undefined);
+  });
+});

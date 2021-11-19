@@ -1,14 +1,33 @@
 {
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+  ],
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
+    "composite": true,
+    "target": "es5",
     "declaration": true,
-    "strict": true,
-    "jsx": "react",
-    "rootDir": "./src",
-    "incremental": true,
+    "declarationMap": true,
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "downlevelIteration": true,
+    "outDir": "dist",
+    "rootDir": "src",
     "experimentalDecorators": true,
-    "lib": ["dom", "es2015"],
-    "types": ["jest", "node", "@types/jest"]
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "types": [
+      "jest",
+      "node",
+      "@types/jest"
+    ]
   }
 }
