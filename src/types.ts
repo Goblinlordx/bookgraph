@@ -31,3 +31,5 @@ export type Graph = {
 export type ViewerState = {
   revealed: string[];
 };
+
+export { GraphError } from "./error";
