@@ -7,6 +7,7 @@ import type {
   NodeTypeSchema,
   ViewerState,
   GraphBuilder,
+  GraphViewer,
 } from "./types";
 
 const compose = <A, B>(f: (a: A) => B) => {
@@ -14,7 +15,7 @@ const compose = <A, B>(f: (a: A) => B) => {
     f: <C>(g: (b: B) => C) => compose((x: A) => g(f(x))),
     out: () => f,
   };
-}
+};
 
 export const initGraph = (): Graph => {
   return {
@@ -163,22 +164,24 @@ export const addNode = (graph: Graph) => (node: Node) => {
   };
 };
 
-export const removeNode = (graph: Graph) => (id: string): Graph => {
-  const adjacencyList = Object.entries(graph.adjacencyList).reduce<
-    Record<string, string[]>
-  >((a, [k, v]) => {
-    if (k === id) return a;
-    a[k] = v.filter((vId) => vId !== id);
+export const removeNode =
+  (graph: Graph) =>
+  (id: string): Graph => {
+    const adjacencyList = Object.entries(graph.adjacencyList).reduce<
+      Record<string, string[]>
+    >((a, [k, v]) => {
+      if (k === id) return a;
+      a[k] = v.filter((vId) => vId !== id);
 
-    return a;
-  }, {});
+      return a;
+    }, {});
 
-  return {
-    ...graph,
-    adjacencyList,
-    nodes: graph.nodes.filter((n) => n.id !== id),
+    return {
+      ...graph,
+      adjacencyList,
+      nodes: graph.nodes.filter((n) => n.id !== id),
+    };
   };
-};
 
 export const graphBuilder = (graph = initGraph()): GraphBuilder => ({
   build: () => graph,
@@ -243,44 +246,40 @@ export const getNodeById = (nodes: Node[]) => {
   return (id: string) => nodeMap[id];
 };
 
-export type GraphViewer = {
-
-}
-
-export const graphViewer = (
-  graph: Graph,
-  viewerState?: { revealed: string[] }
-) => {
-  const getVN = getVisibleNodes(graph);
-  const internalState: ViewerState = {
-    revealed: [...(viewerState?.revealed || [])],
+export const graphViewer =
+  (graph: Graph) =>
+  (viewerState?: { revealed: string[] }): GraphViewer => {
+    const getVN = getVisibleNodes(graph);
+    const internalState: ViewerState = {
+      revealed: [...(viewerState?.revealed || [])],
+    };
+    const visibleNodeIds = getVN(internalState.revealed);
+    const vSet = new Set(visibleNodeIds);
+    const vNodes = graph.nodes.filter((n) => vSet.has(n.id));
+    const getVC = getVisibleChildren(graph, visibleNodeIds);
+    return {
+      revealNodes: compose(revealNodes(internalState))
+        .f(graphViewer(graph))
+        .out(),
+      hideNodes: compose(hideNodes(internalState)).f(graphViewer(graph)).out(),
+      getTypes: () =>
+        graph.nodeSchema.map((s) => ({
+          type: s.type,
+          fields: s.fields.map((f) => ({ ...f })),
+        })),
+      getConnectionTypes: () =>
+        graph.graphSchema.connections.map((c) => c.slice()),
+      getChildren: getVC,
+      getChildrenByType: (id: string, type: string) =>
+        queryType(getVC(id), type),
+      getNodes: () => [...graph.nodes],
+      getVNodes: () => [...vNodes],
+      getByType: (type: string) => queryType(vNodes, type),
+      getNodeById: getNodeById(graph.nodes),
+      getVNodeById: getNodeById(vNodes),
+      state: () => internalState,
+    };
   };
-  const visibleNodeIds = getVN(internalState.revealed);
-  const vSet = new Set(visibleNodeIds);
-  const vNodes = graph.nodes.filter((n) => vSet.has(n.id));
-  const getVC = getVisibleChildren(graph, visibleNodeIds);
-  return {
-    revealNodes: (ids: string[]) =>
-      graphViewer(graph, revealNodes(internalState)(ids)),
-    hideNodes: (ids: string[]) =>
-      graphViewer(graph, hideNodes(internalState)(ids)),
-    getTypes: () =>
-      graph.nodeSchema.map((s) => ({
-        type: s.type,
-        fields: s.fields.map((f) => ({ ...f })),
-      })),
-    getConnectionTypes: () =>
-      graph.graphSchema.connections.map((c) => c.slice()),
-    getChildren: getVC,
-    getChildrenByType: (id: string, type: string) => queryType(getVC(id), type),
-    getNodes: () => [...graph.nodes],
-    getVNodes: () => [...vNodes],
-    getByType: (type: string) => queryType(vNodes, type),
-    getNodeById: getNodeById(graph.nodes),
-    getVNodeById: getNodeById(vNodes),
-    state: () => internalState,
-  };
-};
 
 export * from "./error";
 export * from "./types.d";

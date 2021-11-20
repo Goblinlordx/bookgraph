@@ -44,3 +44,18 @@ export type GraphBuilder = {
   updateNodeType(t: NodeTypeSchema): GraphBuilder
   removeNodeType(t: string): GraphBuilder
 }
+
+export type GraphViewer = {
+  revealNodes(ids: string[]): GraphViewer;
+  hideNodes(ids: string[]): GraphViewer;
+  getTypes(): NodeTypeSchema[];
+  getConnectionTypes(): string[][];
+  getChildren(id: string): Node[];
+  getChildrenByType(id: string, type: string): Node[];
+  getNodes(): Node[];
+  getVNodes(): Node[];
+  getByType(type: string): Node[];
+  getNodeById(id: string): Node;
+  getVNodeById(id: string): Node;
+  state(): ViewerState;
+}

@@ -369,7 +369,7 @@ Array [
 
 describe("graphViewer", () => {
   it("can reveal nodes", () => {
-    const viewer = graphViewer(basicGraph());
+    const viewer = graphViewer(basicGraph())();
     const nodes = viewer.revealNodes(["0"]).getVNodes();
 
     expect(nodes.length).toEqual(2);
@@ -380,21 +380,21 @@ describe("graphViewer", () => {
   });
 
   it("can hide nodes", () => {
-    const viewer = graphViewer(basicGraph());
+    const viewer = graphViewer(basicGraph())();
     const nodes = viewer.revealNodes(["0"]).hideNodes(["1"]).getVNodes();
 
     expect(nodes.length).toEqual(2);
   });
 
   it("can get visible children nodes", () => {
-    const viewer = graphViewer(basicGraph());
+    const viewer = graphViewer(basicGraph())();
     const nodes = viewer.revealNodes(["0", "1"]).getChildren("1");
 
     expect(nodes.length).toEqual(2);
   });
 
   it("can get by type", () => {
-    const viewer = graphViewer(basicGraph());
+    const viewer = graphViewer(basicGraph())();
     const nodes = viewer.revealNodes(["0", "1"]).getByType("chapter");
 
     expect(nodes.length).toEqual(2);
@@ -402,7 +402,7 @@ describe("graphViewer", () => {
   });
 
   it("can get children by type", () => {
-    const viewer = graphViewer(basicGraph());
+    const viewer = graphViewer(basicGraph())();
     const nodes = viewer
       .revealNodes(["0", "1", "2"])
       .getChildrenByType("2", "character");
@@ -414,8 +414,8 @@ describe("graphViewer", () => {
   it("can store and restore state", () => {
     const graph = basicGraph();
 
-    const stored = graphViewer(graph).revealNodes(["0", "1"]).state();
-    const restored = graphViewer(graph, stored).getVNodes();
+    const stored = graphViewer(graph)().revealNodes(["0", "1"]).state();
+    const restored = graphViewer(graph)(stored).getVNodes();
 
     expect(restored.length).toEqual(4);
   });
@@ -423,7 +423,7 @@ describe("graphViewer", () => {
   it("getNodeById: can retrieve invisible node", () => {
     const graph = basicGraph();
 
-    const invisibleNode = graphViewer(graph)
+    const invisibleNode = graphViewer(graph)()
       .revealNodes(["0", "1"])
       .getNodeById("5");
 
@@ -433,7 +433,7 @@ describe("graphViewer", () => {
   it("getVNodeById: can not retrieve invisible node", () => {
     const graph = basicGraph();
 
-    const invisibleNode = graphViewer(graph)
+    const invisibleNode = graphViewer(graph)()
       .revealNodes(["0", "1"])
       .getVNodeById("5");
 
