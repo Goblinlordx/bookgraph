@@ -153,12 +153,30 @@ export const addNode = (graph: Graph) => (node: Node) => {
   };
 };
 
+export const removeNode = (graph: Graph, id: string): Graph => {
+  const adjacencyList = Object.entries(graph.adjacencyList).reduce<
+    Record<string, string[]>
+  >((a, [k, v]) => {
+    if (k === id) return a;
+    a[k] = v.filter((vId) => vId !== id);
+
+    return a;
+  }, {});
+
+  return {
+    ...graph,
+    adjacencyList,
+    nodes: graph.nodes.filter((n) => n.id !== id),
+  };
+};
+
 export const graphBuilder = (_graph?: Graph) => {
   const graph = _graph || initGraph();
 
   return {
     build: () => graph,
     addNode: (node: Node) => graphBuilder(addNode(graph)(node)),
+    removeNode: (id: string) => graphBuilder(removeNode(graph, id)),
     addConnection: (connection: NodeConectionSchema) =>
       graphBuilder(addConnection(graph)(connection)),
     removeConnection: (connection: NodeConectionSchema) =>
@@ -171,8 +189,7 @@ export const graphBuilder = (_graph?: Graph) => {
       graphBuilder(addNodeType(graph)(nodeType)),
     updateNodeType: (nodeType: NodeTypeSchema) =>
       graphBuilder(updateNodeType(graph)(nodeType)),
-    removeNodeType: (type: string) =>
-      graphBuilder(removeNodeType(graph)(type)),
+    removeNodeType: (type: string) => graphBuilder(removeNodeType(graph)(type)),
   };
 };
 
