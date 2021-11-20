@@ -1,3 +1,4 @@
+import { GraphError } from "./error";
 import type {
   Graph,
   Node,
@@ -18,7 +19,7 @@ export const initGraph = (): Graph => {
 export const addNodeType = (graph: Graph) => (schema: NodeTypeSchema) => {
   const { type: newType } = schema;
   const exists = graph.nodeSchema.some((t) => t.type === newType);
-  if (exists) throw new Error("Type of same name already exists");
+  if (exists) throw new GraphError("Type of same name already exists");
 
   return {
     ...graph,
@@ -29,7 +30,7 @@ export const addNodeType = (graph: Graph) => (schema: NodeTypeSchema) => {
 export const updateNodeType = (graph: Graph) => (schema: NodeTypeSchema) => {
   const { type: newType } = schema;
   const exists = graph.nodeSchema.some((t) => t.type === newType);
-  if (!exists) throw new Error("Type does not exist");
+  if (!exists) throw new GraphError("Type does not exist");
 
   return {
     ...graph,
@@ -39,7 +40,7 @@ export const updateNodeType = (graph: Graph) => (schema: NodeTypeSchema) => {
 
 export const removeNodeType = (graph: Graph) => (type: string) => {
   const exists = graph.nodeSchema.some((t) => t.type === type);
-  if (!exists) throw new Error("Type does not exist");
+  if (!exists) throw new GraphError("Type does not exist");
 
   return {
     ...graph,
@@ -51,13 +52,13 @@ export const addConnectionType =
   (graph: Graph) => (connection: NodeConectionSchema) => {
     const validTypes = new Set(graph.nodeSchema.map((t) => t.type));
     if (!connection.every((t) => validTypes.has(t)))
-      throw new Error("Type does not exist");
+      throw new GraphError("Type does not exist");
     if (
       graph.graphSchema.connections.some(
         (c) => c[0] === connection[0] && c[1] === connection[1]
       )
     )
-      throw new Error("Connection type already exists");
+      throw new GraphError("Connection type already exists");
 
     return {
       ...graph,
@@ -85,7 +86,7 @@ export const addConnection =
   (graph: Graph) => (connection: NodeConectionSchema) => {
     const existingIds = new Set(graph.nodes.map((n) => n.id));
     const valid = connection.every((id) => existingIds.has(id));
-    if (!valid) throw new Error(`ID does not exist`);
+    if (!valid) throw new GraphError(`ID does not exist`);
 
     const conIds = new Set(connection);
     const conTypes = graph.nodes
@@ -95,7 +96,7 @@ export const addConnection =
       ([l, r]) => l === conTypes[0] && r === conTypes[1]
     );
     if (!validType)
-      throw new Error(`invalid connection type: ${conTypes.join(" -> ")}`);
+      throw new GraphError(`invalid connection type: ${conTypes.join(" -> ")}`);
 
     const list = graph.adjacencyList[connection[0]]?.slice() || [];
     if (list.indexOf(connection[0]) === -1) list.push(connection[1]);
@@ -116,7 +117,7 @@ export const removeConnection =
     const existingIds = new Set(graph.nodes.map((n) => n.id));
 
     const valid = connection.every((id) => existingIds.has(id));
-    if (!valid) throw new Error(`ID does not exist`);
+    if (!valid) throw new GraphError(`ID does not exist`);
 
     const adjacencyList = Object.entries(graph.adjacencyList).reduce<
       Record<string, string[]>
@@ -142,10 +143,10 @@ export const createNode = (node: Omit<Node, "id">): Node => {
 
 export const addNode = (graph: Graph) => (node: Node) => {
   const existingIds = new Set(graph.nodes.map((n) => n.id));
-  if (existingIds.has(node.id)) throw new Error("Id already exists");
+  if (existingIds.has(node.id)) throw new GraphError("Id already exists");
 
   const existingTypes = new Set(graph.nodeSchema.map((t) => t.type));
-  if (!existingTypes.has(node.type)) throw new Error("invalid type");
+  if (!existingTypes.has(node.type)) throw new GraphError("invalid type");
 
   return {
     ...graph,
