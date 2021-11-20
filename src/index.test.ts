@@ -370,18 +370,18 @@ Array [
 describe("graphViewer", () => {
   it("can reveal nodes", () => {
     const viewer = graphViewer(basicGraph());
-    const nodes = viewer.revealNodes(["0"]).getNodes();
+    const nodes = viewer.revealNodes(["0"]).getVNodes();
 
     expect(nodes.length).toEqual(2);
 
-    const nodes2 = viewer.revealNodes(["0", "1"]).getNodes();
+    const nodes2 = viewer.revealNodes(["0", "1"]).getVNodes();
 
     expect(nodes2.length).toEqual(4);
   });
 
   it("can hide nodes", () => {
     const viewer = graphViewer(basicGraph());
-    const nodes = viewer.revealNodes(["0"]).hideNodes(["1"]).getNodes();
+    const nodes = viewer.revealNodes(["0"]).hideNodes(["1"]).getVNodes();
 
     expect(nodes.length).toEqual(2);
   });
@@ -415,7 +415,7 @@ describe("graphViewer", () => {
     const graph = basicGraph();
 
     const stored = graphViewer(graph).revealNodes(["0", "1"]).state();
-    const restored = graphViewer(graph, stored).getNodes();
+    const restored = graphViewer(graph, stored).getVNodes();
 
     expect(restored.length).toEqual(4);
   });
