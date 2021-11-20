@@ -1,11 +1,20 @@
 import { GraphError } from "./error";
+
 import type {
   Graph,
   Node,
   NodeConectionSchema,
   NodeTypeSchema,
   ViewerState,
+  GraphBuilder,
 } from "./types";
+
+const compose = <A, B>(f: (a: A) => B) => {
+  return {
+    f: <C>(g: (b: B) => C) => compose((x: A) => g(f(x))),
+    out: () => f,
+  };
+}
 
 export const initGraph = (): Graph => {
   return {
@@ -154,7 +163,7 @@ export const addNode = (graph: Graph) => (node: Node) => {
   };
 };
 
-export const removeNode = (graph: Graph, id: string): Graph => {
+export const removeNode = (graph: Graph) => (id: string): Graph => {
   const adjacencyList = Object.entries(graph.adjacencyList).reduce<
     Record<string, string[]>
   >((a, [k, v]) => {
@@ -171,28 +180,20 @@ export const removeNode = (graph: Graph, id: string): Graph => {
   };
 };
 
-export const graphBuilder = (_graph?: Graph) => {
-  const graph = _graph || initGraph();
-
-  return {
-    build: () => graph,
-    addNode: (node: Node) => graphBuilder(addNode(graph)(node)),
-    removeNode: (id: string) => graphBuilder(removeNode(graph, id)),
-    addConnection: (connection: NodeConectionSchema) =>
-      graphBuilder(addConnection(graph)(connection)),
-    removeConnection: (connection: NodeConectionSchema) =>
-      graphBuilder(removeConnection(graph)(connection)),
-    addConnectionType: (connectionType: NodeConectionSchema) =>
-      graphBuilder(addConnectionType(graph)(connectionType)),
-    removeConnectionType: (connectionType: NodeConectionSchema) =>
-      graphBuilder(removeConnectionType(graph)(connectionType)),
-    addNodeType: (nodeType: NodeTypeSchema) =>
-      graphBuilder(addNodeType(graph)(nodeType)),
-    updateNodeType: (nodeType: NodeTypeSchema) =>
-      graphBuilder(updateNodeType(graph)(nodeType)),
-    removeNodeType: (type: string) => graphBuilder(removeNodeType(graph)(type)),
-  };
-};
+export const graphBuilder = (graph = initGraph()): GraphBuilder => ({
+  build: () => graph,
+  addNode: compose(addNode(graph)).f(graphBuilder).out(),
+  removeNode: compose(removeNode(graph)).f(graphBuilder).out(),
+  addConnection: compose(addConnection(graph)).f(graphBuilder).out(),
+  removeConnection: compose(removeConnection(graph)).f(graphBuilder).out(),
+  addConnectionType: compose(addConnectionType(graph)).f(graphBuilder).out(),
+  removeConnectionType: compose(removeConnectionType(graph))
+    .f(graphBuilder)
+    .out(),
+  addNodeType: compose(addNodeType(graph)).f(graphBuilder).out(),
+  updateNodeType: compose(updateNodeType(graph)).f(graphBuilder).out(),
+  removeNodeType: compose(removeNodeType(graph)).f(graphBuilder).out(),
+});
 
 export const getVisibleNodes = (graph: Graph) => (revealed: string[]) => {
   const visible = new Set(revealed);
@@ -242,6 +243,10 @@ export const getNodeById = (nodes: Node[]) => {
   return (id: string) => nodeMap[id];
 };
 
+export type GraphViewer = {
+
+}
+
 export const graphViewer = (
   graph: Graph,
   viewerState?: { revealed: string[] }
@@ -277,4 +282,5 @@ export const graphViewer = (
   };
 };
 
-export * from './types'
+export * from "./error";
+export * from "./types.d";

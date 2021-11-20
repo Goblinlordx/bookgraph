@@ -32,4 +32,15 @@ export type ViewerState = {
   revealed: string[];
 };
 
-export { GraphError } from "./error";
+export type GraphBuilder = {
+  build(): Graph;
+  addNode(n: Node): GraphBuilder;
+  removeNode(id: string): GraphBuilder;
+  addConnection(c: NodeConectionSchema): GraphBuilder;
+  removeConnection(c: NodeConectionSchema): GraphBuilder;
+  addConnectionType(c: NodeConectionSchema): GraphBuilder;
+  removeConnectionType(c: NodeConectionSchema): GraphBuilder;
+  addNodeType(t: NodeTypeSchema): GraphBuilder
+  updateNodeType(t: NodeTypeSchema): GraphBuilder
+  removeNodeType(t: string): GraphBuilder
+}
